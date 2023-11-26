@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { MongoClient } = require('mongodb');
  
-var cors = require('cors')
+var cors = require('cors');
 require('dotenv').config();
 
 const app = express();
@@ -15,17 +15,12 @@ const io = require("socket.io")(server, {
   cors: {
     origin: '*',
     methods: ["GET", "POST"],
-    // allowedHeaders: ["my-custom-header"],
   }
 });
 
-
-
-
 const PORT = process.env.PORT || 5000;
 const secretKey = process.env.JWT_SECRET;
-const mongoURI = 'mongodb://127.0.0.1:27017/chatapp'; // Replace with your local MongoDB connection URI
-
+const mongoURI = 'mongodb://127.0.0.1:27017/chatapp';
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -33,18 +28,18 @@ app.use(bodyParser.json());
 let db;
 
 const connectToMongoDB = async () => {
-  const client = new MongoClient(mongoURI, { useNewUrlParser: true}); // useUnifiedTopology: true
+  const client = new MongoClient(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
 
   try {
     await client.connect();
     console.log('Connected to MongoDB');
-    db = client.db(); // Set the database instance
+    db = client.db();
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
   }
 };
 
-connectToMongoDB(); // Connect when the server starts
+connectToMongoDB();
 
 // Registration endpoint
 app.post('/register', async (req, res) => {
@@ -89,17 +84,23 @@ app.get('/protected', authenticateJWT, (req, res) => {
 });
 
 function authenticateJWT(req, res, next) {
-  const token = req.header('Authorization');
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
 
-  if (!token) return res.status(403).json({ message: 'Access denied' });
+    jwt.verify(token, secretKey, (err, user) => {
+      if (err) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
 
-  jwt.verify(token, secretKey, (err, user) => {
-    if (err) return res.status(401).json({ message: 'Invalid token' });
-
-    req.user = user;
-    next();
-  });
+      req.user = user;
+      next();
+    });
+  } else {
+    return res.status(403).json({ message: 'Access denied' });
+  }
 }
+
 
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
@@ -114,6 +115,49 @@ io.on('connection', (socket) => {
     console.log(`User disconnected: ${socket.id}`);
   });
 });
+
+// Endpoint to send a message
+app.post('/send-message', authenticateJWT, async (req, res) => {
+  const { username, message } = req.body;
+
+  // Save the message to the MongoDB database
+  try {
+    await db.collection('messages').insertOne({ username, message, timestamp: new Date() });
+    // Broadcast the message to other clients
+    io.emit('new-message', { username, message });
+
+    res.json({ message: 'Message sent successfully' });
+  } catch (error) {
+    console.error('Error sending message:', error.message);
+    res.status(500).json({ message: 'Error sending message' });
+  }
+});
+
+app.get('/user', authenticateJWT, async (req, res) => {
+  try {
+    const user = await db.collection('users').findOne({ username: req.user.username });
+    if (user) {
+      res.json({ username: user.username });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching user:', error.message);
+    res.status(500).json({ message: 'Error fetching user' });
+  }
+});
+
+// Endpoint to get chat history
+app.get('/get-chat', authenticateJWT, async (req, res) => {
+  try {
+    const messages = await db.collection('messages').find({}).toArray();
+    res.json(messages);
+  } catch (error) {
+    console.error('Error fetching chat:', error.message);
+    res.status(500).json({ message: 'Error fetching chat' });
+  }
+});
+
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
