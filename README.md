@@ -20,7 +20,7 @@ SwiftSpeak is a real-time chat application built with Node.js, Express, Socket.I
 ### Setting Up
 1. **Clone the repository**
    ```
-   git clone https://github.com/Aryan2892/ChatApp.git
+   git clone https://github.com/Aryan2892/SwiftSpeak.git
    cd ChatApp
    ```
 
