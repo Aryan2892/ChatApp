@@ -1,7 +1,7 @@
-# Secure Chat App
+# SwiftSpeak
 
 ## Description
-Secure Chat App is a real-time chat application built with Node.js, Express, Socket.IO, MongoDB, and React. It provides a simple yet secure platform for users to communicate with each other in real-time.
+SwiftSpeak is a real-time chat application built with Node.js, Express, Socket.IO, MongoDB, and React. It provides a simple yet secure platform for users to communicate with each other in real-time.
 
 ## Features
 - Real-time messaging
