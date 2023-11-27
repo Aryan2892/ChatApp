@@ -19,22 +19,23 @@ Secure Chat App is a real-time chat application built with Node.js, Express, Soc
 
 ### Setting Up
 1. **Clone the repository**
-
    ```
    git clone https://github.com/Aryan2892/ChatApp.git
    cd ChatApp
+   ```
+
 2. **Install server dependencies**
+    ```
+    cd server
+    npm install
+    ```
 
-  ```
-  cd server
-  npm install
-  ```
 3. **Install client dependencies**
+    ```
+    cd ../client
+    npm install
+    ```
 
-  ```
-  cd ../client
-  npm install
-  ```
 4.**Environment Variables**
 Set up your MongoDB URI and JWT secret key in a .env file in the server directory.
 
@@ -42,19 +43,19 @@ Set up your MongoDB URI and JWT secret key in a .env file in the server director
 
 1.Start the server
 In the server directory, start the Node.js server.
-```
+  ```
   Copy code
   cd server
   npm start
-```
+  ```
 
 2.Start the client
 In a new terminal, navigate to the client directory and start the React app.
-```
+  ```
   Copy code
   cd ../client
   npm start
-```
+  ```
 The client will be available at http://localhost:3000.
 
 ## Usage
