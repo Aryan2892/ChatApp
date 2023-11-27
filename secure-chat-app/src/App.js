@@ -11,7 +11,7 @@ function App() {
     
     <Router>
       <div className="App">
-        <h1>Secure Chat App</h1>
+        <h1>SwiftSpeak</h1>
         <Routes>
           <Route path="/register" element={<RegistrationForm />} />
           <Route path="/login" element={<LoginForm />} />
